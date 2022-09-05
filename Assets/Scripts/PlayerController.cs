@@ -1,11 +1,12 @@
-using System;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float torqueAmount = 1f;
+    [SerializeField] private float reloadTimer = 1f;
+    [SerializeField] private ParticleSystem finishEffect;
+    [SerializeField] private ParticleSystem crashEffect;
 
     private Rigidbody2D rb;
 
@@ -40,7 +41,8 @@ public class PlayerController : MonoBehaviour
     {
         if (other.CompareTag("Finish"))
         {
-            SceneManager.LoadScene(0);
+            finishEffect.Play();
+            Invoke(nameof(ReloadScene), reloadTimer);
         }
     }
 
@@ -48,7 +50,14 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Ground") && headCollider.IsTouching(other.collider))
         {
-            SceneManager.LoadScene(0);
+            crashEffect.Play();
+            Invoke(nameof(ReloadScene), reloadTimer);
+            
         }
+    }
+    
+    private void ReloadScene()
+    {
+        SceneManager.LoadScene(0);
     }
 }
