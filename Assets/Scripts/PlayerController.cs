@@ -3,29 +3,40 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Control Variables")]
     [SerializeField] private float torqueAmount = 1f;
-    [SerializeField] private float reloadTimer = 1f;
-    [SerializeField] private ParticleSystem finishEffect;
-    [SerializeField] private ParticleSystem crashEffect;
+    [SerializeField] private float baseSpeed = 18f;
+    [SerializeField] private float boostSpeed = 25f;
 
+    private SurfaceEffector2D surfaceEffector2D;
     private Rigidbody2D rb;
+    private bool canMove = true;
 
-    private CircleCollider2D headCollider;
+    public bool CanMove
+    {
+        get { return canMove; }
+    }
+
+
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        headCollider = GetComponent<CircleCollider2D>();
+        surfaceEffector2D = FindObjectOfType<SurfaceEffector2D>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        GetInput();
+        if (canMove)
+        {
+            GetBoost();
+            GetRotation();
+        }
     }
 
-    private void GetInput()
+    private void GetRotation()
     {
         if (Input.GetKey(KeyCode.LeftArrow))
         {
@@ -37,27 +48,20 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    private void GetBoost()
     {
-        if (other.CompareTag("Finish"))
+        if (Input.GetKey(KeyCode.Space))
         {
-            finishEffect.Play();
-            Invoke(nameof(ReloadScene), reloadTimer);
+            surfaceEffector2D.speed = boostSpeed;
+        }
+        else
+        {
+            surfaceEffector2D.speed = baseSpeed;
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D other)
+    public void DisableControls()
     {
-        if (other.gameObject.CompareTag("Ground") && headCollider.IsTouching(other.collider))
-        {
-            crashEffect.Play();
-            Invoke(nameof(ReloadScene), reloadTimer);
-            
-        }
-    }
-    
-    private void ReloadScene()
-    {
-        SceneManager.LoadScene(0);
+        canMove = false;
     }
 }
